@@ -1,0 +1,37 @@
+{
+  "name": "@dwidge/llm-file-diff",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwidge/llm-file-diff.git"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/esm/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "prepare": "rimraf dist && ncp assets/ dist/ && tsc && tsc --project tsconfig.cjs.json",
+    "clean": "rimraf dist",
+    "test": "node --enable-source-maps --test --test-name-pattern"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "assert": "^2.1.0",
+    "ncp": "^2.0.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.2.2"
+  }
+}
