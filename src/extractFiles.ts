@@ -1,5 +1,6 @@
 import { extractCodeBlocks } from "./extractCodeBlocks.js";
 import { extractFilenameFromCodeBlock } from "./extractFilenameFromCodeBlock.js";
+import { extractFilenameFromLine } from "./extractFilenameFromLine.js";
 
 /**
  * Extracts files from an AI response string based on code blocks and their types.
@@ -49,7 +50,9 @@ export function extractFilesFromAIResponse(
 ): Record<string, string> {
   const fileContents: Record<string, string> = {};
 
-  for (const { fileType, content } of extractCodeBlocks(response)) {
+  for (const { fileType, content, previousLine } of extractCodeBlocks(
+    response
+  )) {
     // Infer the file extension based on the type
     let fileExtension: string;
     switch (fileType) {
@@ -77,6 +80,8 @@ export function extractFilesFromAIResponse(
       ? content.split("\n").slice(1).join("\n")
       : content;
 
+    const extractedPathPrevLine = extractFilenameFromLine(previousLine);
+
     // Find a matching context file based on the file type
     const matchingTypes = Object.keys(contextFiles).filter((filePath) =>
       filePath.endsWith(fileExtension)
@@ -86,7 +91,8 @@ export function extractFilesFromAIResponse(
 
     const randomPath = fileType + randomId() + fileExtension;
 
-    const key = extractedPath ?? guessedPath ?? randomPath;
+    const key =
+      extractedPath ?? extractedPathPrevLine ?? guessedPath ?? randomPath;
 
     fileContents[key] = mergeFile(fileContents[key], trimmedContent);
   }
