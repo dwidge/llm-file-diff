@@ -88,10 +88,7 @@ const y: number = 2;
 
     assert.strictEqual(Object.keys(result).length, 1);
     assert.deepEqual(Object.keys(result), ["file1.ts"]);
-    assert.strictEqual(
-      result["file1.ts"],
-      "const x: number = 1;\n\nconst y: number = 2;\n"
-    );
+    assert.strictEqual(result["file1.ts"], "const y: number = 2;\n");
   });
 
   it("uniqueFilename", () => {
@@ -112,5 +109,53 @@ const y: number = 2;
       result["subdir/file4.css"],
       "body { background-color: white; }\n"
     );
+  });
+
+  it("cssWithFileComment", () => {
+    const response = `
+Here is some code:
+\`\`\`css
+/* subdir2/file5.css */
+body { background-color: white; }
+\`\`\`
+`;
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 1);
+    assert.strictEqual(
+      result["subdir2/file5.css"],
+      "body { background-color: white; }\n"
+    );
+  });
+
+  it("cssWithFileMarkdown", () => {
+    const response = `
+Here is some code:
+\`\`\`css
+/* \`subdir2/file5.css\` */
+body { background-color: white; }
+\`\`\`
+`;
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 1);
+    assert.strictEqual(
+      result["subdir2/file5.css"],
+      "body { background-color: white; }\n"
+    );
+  });
+
+  it("javascriptWithFileComment", () => {
+    const response = `
+Here is some code:
+\`\`\`javascript
+// \`subdir2/file5.js\`
+const x = 1;
+\`\`\`
+`;
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 1);
+    assert.strictEqual(result["subdir2/file5.js"], "const x = 1;\n");
   });
 });

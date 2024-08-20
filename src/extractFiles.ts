@@ -1,3 +1,6 @@
+import { extractCodeBlocks } from "./extractCodeBlocks.js";
+import { extractFilenameFromCodeBlock } from "./extractFilenameFromCodeBlock.js";
+
 /**
  * Extracts files from an AI response string based on code blocks and their types.
  *
@@ -40,8 +43,6 @@
  * // }
  */
 
-import { extractCodeBlocks } from "./extractCodeBlocks";
-
 export function extractFilesFromAIResponse(
   response: string,
   contextFiles: Record<string, string>
@@ -71,19 +72,30 @@ export function extractFilesFromAIResponse(
         fileExtension = ".txt";
     }
 
-    const newFilename = fileType + randomId() + fileExtension;
+    const extractedPath = extractFilenameFromCodeBlock(content);
+    const trimmedContent = extractedPath
+      ? content.split("\n").slice(1).join("\n")
+      : content;
 
     // Find a matching context file based on the file type
-    const matchingFilePath = Object.keys(contextFiles).find((filePath) =>
+    const matchingTypes = Object.keys(contextFiles).filter((filePath) =>
       filePath.endsWith(fileExtension)
     );
+    const guessedPath =
+      matchingTypes.length === 1 ? matchingTypes[0] : undefined;
 
-    const key = matchingFilePath ?? newFilename;
-    fileContents[key] = fileContents[key]
-      ? fileContents[key] + "\n" + content + "\n"
-      : content + "\n";
+    const randomPath = fileType + randomId() + fileExtension;
+
+    const key = extractedPath ?? guessedPath ?? randomPath;
+
+    fileContents[key] = mergeFile(fileContents[key], trimmedContent);
   }
 
   return fileContents;
 }
+
 const randomId = () => Math.random().toFixed(5).slice(2);
+
+function mergeFile(old: string | undefined, diff: string): string {
+  return diff + "\n";
+}
