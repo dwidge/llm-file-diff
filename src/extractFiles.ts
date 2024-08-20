@@ -40,20 +40,15 @@
  * // }
  */
 
+import { extractCodeBlocks } from "./extractCodeBlocks";
+
 export function extractFilesFromAIResponse(
   response: string,
   contextFiles: Record<string, string>
 ): Record<string, string> {
   const fileContents: Record<string, string> = {};
 
-  // Regular expression to match the code blocks
-  const regex = /```([a-z]*?)\n([\s\S]*?)\n```/g;
-  let match;
-
-  while ((match = regex.exec(response)) !== null) {
-    const fileType = match[1].trim();
-    const content = match[2].trim();
-
+  for (const { fileType, content } of extractCodeBlocks(response)) {
     // Infer the file extension based on the type
     let fileExtension: string;
     switch (fileType) {
