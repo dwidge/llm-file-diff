@@ -68,10 +68,10 @@ export function extractFilesFromAIResponse(
         fileExtension = ".css";
         break;
       default:
-        fileExtension = "txt";
+        fileExtension = ".txt";
     }
 
-    const newFilename = fileType + randomId() + "." + fileExtension;
+    const newFilename = fileType + randomId() + fileExtension;
 
     // Find a matching context file based on the file type
     const matchingFilePath = Object.keys(contextFiles).find((filePath) =>
