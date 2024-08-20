@@ -198,4 +198,17 @@ const x = 1;
     assert.strictEqual(Object.keys(result).length, 1);
     assert.strictEqual(result["subdir2/file5.js"], "const x = 1;\n");
   });
+
+  it("javascriptWithFilePathOnPrevLine4", () => {
+    const response = `
+### subdir2/file5.js
+\`\`\`javascript
+const x = 1;
+\`\`\`
+`;
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 1);
+    assert.strictEqual(result["subdir2/file5.js"], "const x = 1;\n");
+  });
 });

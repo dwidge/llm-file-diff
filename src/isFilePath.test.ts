@@ -36,4 +36,8 @@ describe("isFilePath", () => {
     expect(isFilePath("C:\\path\\to\\file.")).toBe(false);
     expect(isFilePath("path/to/file.txt/invalidextension")).toBe(false);
   });
+
+  test("invalidQuotes", () => {
+    expect(isFilePath("file path: '/path/to/file.js")).toBe(false);
+  });
 });

@@ -1,8 +1,9 @@
 import { isFilePath } from "./isFilePath.js";
 
 export function extractFilenameFromLine(previousLine: string) {
-  // Check for unquoted file path
-  if (isFilePath(previousLine)) return previousLine;
+  // Check for unquoted file path and trim surrounding symbols/whitespace
+  const trimmedLine = previousLine.trim().replace(/^[^\w/]+|[^\w/]+$/g, "");
+  if (isFilePath(trimmedLine)) return trimmedLine;
 
   // Check for first quoted file path
   for (const quotedPath of findQuoted(previousLine)) {
