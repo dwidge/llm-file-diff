@@ -7,6 +7,7 @@ describe("extractFilesFromAIResponse", () => {
     "file1.ts": "existing TypeScript file",
     "file2.js": "existing JavaScript file",
     "file3.json": "existing JSON file",
+    "subdir/file4.css": "existing CSS file in subdir",
   };
 
   it("TypeScript", () => {
@@ -99,5 +100,17 @@ const y: number = 2;
 
     assert.strictEqual(Object.keys(result).length, 1);
     assert.match(Object.keys(result)[0] ?? "", /\.html$/); // Ensure the filename ends with .html
+  });
+
+  it("subdir", () => {
+    const response =
+      "Here is some CSS code:\n```css\nbody { background-color: white; }\n```";
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 1);
+    assert.strictEqual(
+      result["subdir/file4.css"],
+      "body { background-color: white; }\n"
+    );
   });
 });
