@@ -12,6 +12,8 @@ describe("isFilePath", () => {
     expect(isFilePath("/path/to/file.txt")).toBe(true);
     expect(isFilePath("D:\\Documents\\file.doc")).toBe(true);
     expect(isFilePath("/usr/local/bin/script.sh")).toBe(true);
+    expect(isFilePath("C:\\path\\to\\valid~file.txt")).toBe(true);
+    expect(isFilePath("C:\\path\\to\\valid@file.txt")).toBe(true);
   });
 
   test("relative", () => {
@@ -24,8 +26,10 @@ describe("isFilePath", () => {
     expect(isFilePath("/path/to/file")).toBe(false);
   });
 
-  test.skip("invalidCharacters", () => {
-    expect(isFilePath("C:\\path\\to\\@invalid~file.txt")).toBe(false);
+  test("invalidCharacters", () => {
+    expect(isFilePath("C:\\path\\to\\invalid|file.txt")).toBe(false);
+    expect(isFilePath("C:\\path\\to\\invalid<file.txt")).toBe(false);
+    expect(isFilePath("C:\\path\\to\\invalid>file.txt")).toBe(false);
   });
 
   test.skip("invalidDrive", () => {

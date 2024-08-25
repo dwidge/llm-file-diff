@@ -12,7 +12,7 @@ export function isFilePath(path: string): boolean {
 
   // Updated regular expression to validate both absolute and relative file paths
   const filePathRegex =
-    /^(?:[a-zA-Z]:)?(?:[\\/].+|[^\\/]+)(?:[\\/][\w .-]+)*\.\w+$/;
+    /^(?:[a-zA-Z]:)?(?:[\\/].+|[^\\/]+)(?:[\\/][\w .~-]+)*\.\w+$/;
 
   // Check for additional invalid characters like colons or quotes that shouldn't be in file paths
   const invalidCharactersRegex = /[<>"'`|?*]/;
