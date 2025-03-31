@@ -211,4 +211,48 @@ const x = 1;
     assert.strictEqual(Object.keys(result).length, 1);
     assert.strictEqual(result["subdir2/file5.js"], "const x = 1;\n");
   });
+
+  it("mixedWithComment", () => {
+    const response = `
+Here is some code:
+\`\`\`css
+/* src/file1.css */
+content1
+\`\`\`
+\`\`\`js
+// src/file2.js
+content2
+\`\`\`
+\`\`\`
+// src/file3.txt
+content3
+content3
+\`\`\`
+
+\`\`\`
+// src/file4.txt
+content4
+content4
+content4
+\`\`\`
+
+src/file5.txt
+\`\`\`
+content5
+
+content5
+\`\`\`
+`;
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 5);
+    assert.strictEqual(result["src/file1.css"], "content1\n");
+    assert.strictEqual(result["src/file2.js"], "content2\n");
+    assert.strictEqual(result["src/file3.txt"], "content3\ncontent3\n");
+    assert.strictEqual(
+      result["src/file4.txt"],
+      "content4\ncontent4\ncontent4\n"
+    );
+    assert.strictEqual(result["src/file5.txt"], "content5\n\ncontent5\n");
+  });
 });
