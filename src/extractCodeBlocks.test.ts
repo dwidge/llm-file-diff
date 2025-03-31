@@ -130,6 +130,71 @@ console.log("This is without a type block");
   assert.deepStrictEqual(result, expectedOutput);
 });
 
+test("handles internal backticks inside code blocks", () => {
+  const response = `
+\`\`\`
+console.log(\`This is inside a backtick\`);
+\`\`\`
+  `;
+
+  const expectedOutput = [
+    {
+      fileType: "",
+      content: "console.log(`This is inside a backtick`);",
+      previousLine: "",
+    },
+  ];
+
+  const result = Array.from(extractCodeBlocks(response));
+  assert.deepStrictEqual(result, expectedOutput);
+});
+
+test("handles internal backticks inside code blocks", () => {
+  const response = `
+\`\`\`
+export const s=\`
+console.log("internal backticks");
+\`;
+\`\`\`
+  `;
+
+  const expectedOutput = [
+    {
+      fileType: "",
+      content: `export const s=\`
+console.log("internal backticks");
+\`;`,
+      previousLine: "",
+    },
+  ];
+
+  const result = Array.from(extractCodeBlocks(response));
+  assert.deepStrictEqual(result, expectedOutput);
+});
+
+test("handles internal triple backticks on indented lines inside code blocks", () => {
+  const response = `
+\`\`\`
+export const s=\`
+console.log("\`\`\`Triple backticks\`\`\`");
+\`;
+\`\`\`
+  `;
+
+  const expectedOutput = [
+    {
+      fileType: "",
+      content: `export const s=\`
+console.log("\`\`\`Triple backticks\`\`\`");
+\`;`,
+      previousLine: "",
+    },
+  ];
+
+  const result = Array.from(extractCodeBlocks(response));
+  assert.deepStrictEqual(result, expectedOutput);
+});
+
 test("extracts no code blocks", () => {
   const response = `
 No code blocks here, just regular text.

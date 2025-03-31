@@ -1,0 +1,18 @@
+```
+// a1.ts
+const a=`${file}\n\`\`\`\n${content}\n\`\`\`\n`
+```
+```
+// a2.ts
+export default (id: string) => `
+<!DOCTYPE html>
+    <script>
+      // @ts-ignore
+      const id = "${id}";
+      const STORAGE_KEYS = {
+        openFiles: \`openFiles-\${tabId}\`,
+      };
+    </script>
+</html>
+`;
+```

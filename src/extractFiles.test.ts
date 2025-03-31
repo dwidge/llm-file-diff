@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 import { describe, it } from "node:test";
 import { extractFilesFromAIResponse } from "./extractFiles.js";
+import { readFileSync } from "fs";
 
 describe("extractFilesFromAIResponse", () => {
   const contextFiles = {
@@ -254,5 +255,16 @@ content5
       "content4\ncontent4\ncontent4\n"
     );
     assert.strictEqual(result["src/file5.txt"], "content5\n\ncontent5\n");
+  });
+
+  it("mixedWithInternalBackticks", () => {
+    const response = readFileSync("./src/data/a.txt").toString();
+    const a1 = readFileSync("./src/data/a1.txt").toString();
+    const a2 = readFileSync("./src/data/a2.txt").toString();
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.deepStrictEqual(Object.keys(result), ["a1.ts", "a2.ts"]);
+    assert.strictEqual(result["a1.ts"], a1);
+    assert.strictEqual(result["a2.ts"], a2);
   });
 });

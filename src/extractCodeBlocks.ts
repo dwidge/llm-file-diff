@@ -17,6 +17,7 @@ export function* extractCodeBlocks(
     const previousLine = (match[1] || "").trim();
     const fileType = (match[2] || "").trim();
     const content = (match[3] || "").trim();
+    if (!content.trim()) continue;
     yield { fileType, content, previousLine };
   }
 }
