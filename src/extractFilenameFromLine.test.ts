@@ -41,6 +41,28 @@ describe("extractFilenameFromLine", () => {
     assert.strictEqual(result, "/path/to/file.js");
   });
 
+  it("should return a file path unquoted in a bash comment", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("# /path/to/file.js"),
+      "/path/to/file.js"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# path/to/file.js"),
+      "path/to/file.js"
+    );
+  });
+
+  it("should return a file path unquoted in a c comment", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("// /path/to/file.js"),
+      "/path/to/file.js"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("// path/to/file.js"),
+      "path/to/file.js"
+    );
+  });
+
   it("should handle an empty line", () => {
     const result = extractFilenameFromLine("");
     assert.strictEqual(result, undefined);
@@ -61,5 +83,19 @@ describe("extractFilenameFromLine", () => {
   it("should handle a path surrounded by symbols 2", () => {
     const result = extractFilenameFromLine("##### a/file/path.txt ###");
     assert.strictEqual(result, "a/file/path.txt");
+  });
+
+  it("should return the first valid unquoted file path from a sentence", () => {
+    const result = extractFilenameFromLine(
+      "This is an example path: /valid/path/file.txt."
+    );
+    assert.strictEqual(result, "/valid/path/file.txt");
+  });
+
+  it("should return the correct unquoted path ignoring invalid paths", () => {
+    const result = extractFilenameFromLine(
+      "Invalid path here: /invalid/path? then a valid one: /another/valid/path.txt"
+    );
+    assert.strictEqual(result, "/another/valid/path.txt");
   });
 });

@@ -17,6 +17,16 @@ export function isFilePath(path: string): boolean {
   // Check for additional invalid characters like colons or quotes that shouldn't be in file paths
   const invalidCharactersRegex = /[<>"'`|?*]/;
 
-  // Return false if the path contains invalid characters or does not match the file path regex
-  return !invalidCharactersRegex.test(path) && filePathRegex.test(path);
+  // Check if path contains invalid characters or not following valid file path structure
+  if (invalidCharactersRegex.test(path)) return false;
+  if (!filePathRegex.test(path)) return false;
+
+  // Ensure there is at most one colon in the path
+  const colonCount = (path.match(/:/g) || []).length;
+  if (colonCount > 1) return false;
+
+  // Ensure there are no spaces in the path
+  if (/\s/.test(path)) return false;
+
+  return true;
 }

@@ -44,4 +44,10 @@ describe("isFilePath", () => {
   test("invalidQuotes", () => {
     expect(isFilePath("file path: '/path/to/file.js")).toBe(false);
   });
+
+  test("invalidExamplePath", () => {
+    expect(isFilePath("This is an example path: /valid/path/file.txt")).toBe(
+      false
+    );
+  });
 });
