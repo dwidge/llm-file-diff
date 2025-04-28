@@ -213,6 +213,53 @@ const x = 1;
     assert.strictEqual(result["subdir2/file5.js"], "const x = 1;\n");
   });
 
+  it("specialFileNameWithComment", () => {
+    const response = `
+Here is the Dockerfile:
+\`\`\`dockerfile
+# Dockerfile
+FROM ubuntu
+RUN echo "Hello"
+\`\`\`
+
+And the LICENSE file:
+\`\`\`text
+// LICENSE
+MIT License
+...
+\`\`\`
+`;
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 2);
+    assert.strictEqual(result["Dockerfile"], 'FROM ubuntu\nRUN echo "Hello"\n');
+    assert.strictEqual(result["LICENSE"], "MIT License\n...\n");
+  });
+
+  it("specialFileNameOnPrevLine", () => {
+    const response = `
+\`Dockerfile\`
+\`\`\`dockerfile
+FROM alpine
+CMD ["echo", "World"]
+\`\`\`
+
+\`README\`
+\`\`\`markdown
+# My Project
+...
+\`\`\`
+`;
+    const result = extractFilesFromAIResponse(response, contextFiles);
+
+    assert.strictEqual(Object.keys(result).length, 2);
+    assert.strictEqual(
+      result["Dockerfile"],
+      'FROM alpine\nCMD ["echo", "World"]\n'
+    );
+    assert.strictEqual(result["README"], "# My Project\n...\n");
+  });
+
   it("mixedWithComment", () => {
     const response = `
 Here is some code:

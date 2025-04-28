@@ -1,14 +1,17 @@
 import * as path from "node:path";
 
+const SPECIAL_FILE_NAMES = ["Dockerfile", "LICENSE", "README", "Makefile"];
+
 /**
  * Checks if a given string looks like a valid file path (absolute or relative)
- * based on common patterns and reserved characters, requiring a file extension.
+ * based on common patterns and reserved characters, requiring a file extension,
+ * with exceptions for known special file names.
  *
  * Note: This is a heuristic check and doesn't guarantee the path exists
  * or is valid on all possible filesystems. It's based on the provided test cases.
  *
  * @param inputPath The string to check.
- * @returns True if the string appears to be a file path with an extension, false otherwise.
+ * @returns True if the string appears to be a file path with an extension or a special file name, false otherwise.
  */
 export function isFilePath(inputPath: string): boolean {
   if (typeof inputPath !== "string") {
@@ -45,6 +48,11 @@ export function isFilePath(inputPath: string): boolean {
 
   try {
     const baseName = path.basename(trimmedPath);
+
+    if (SPECIAL_FILE_NAMES.includes(baseName)) {
+      return true;
+    }
+
     const extName = path.extname(baseName);
 
     if (!extName || extName === ".") {
@@ -59,7 +67,6 @@ export function isFilePath(inputPath: string): boolean {
       }
 
       const lastDotIndex = lastSegment.lastIndexOf(".");
-
       if (lastDotIndex === -1) {
         return false;
       }

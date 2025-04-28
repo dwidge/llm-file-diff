@@ -49,6 +49,13 @@ describe("isFilePath", () => {
     expect(isFilePath("app/[[...optional]]/page.tsx")).toBe(true);
   });
 
+  test("specialFileNames", () => {
+    expect(isFilePath("Dockerfile")).toBe(true);
+    expect(isFilePath("LICENSE")).toBe(true);
+    expect(isFilePath("README")).toBe(true);
+    expect(isFilePath("Makefile")).toBe(true);
+  });
+
   test("withoutExtension", () => {
     expect(isFilePath("C:\\path\\to\\file")).toBe(false);
     expect(isFilePath("/path/to/file")).toBe(false);
