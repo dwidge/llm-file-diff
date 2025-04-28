@@ -1,32 +1,84 @@
+import * as path from "node:path";
+
 /**
- * Determines whether the given string is likely a valid file path.
+ * Checks if a given string looks like a valid file path (absolute or relative)
+ * based on common patterns and reserved characters, requiring a file extension.
  *
- * @param {string} path - The string to check.
- * @returns {boolean} True if the string is a valid file path; otherwise, false.
+ * Note: This is a heuristic check and doesn't guarantee the path exists
+ * or is valid on all possible filesystems. It's based on the provided test cases.
+ *
+ * @param inputPath The string to check.
+ * @returns True if the string appears to be a file path with an extension, false otherwise.
  */
-export function isFilePath(path: string): boolean {
-  // Check for non-empty string and some common characteristics of file paths
-  if (typeof path !== "string" || path.length === 0) {
+export function isFilePath(inputPath: string): boolean {
+  if (typeof inputPath !== "string") {
     return false;
   }
 
-  // Updated regular expression to validate both absolute and relative file paths
-  const filePathRegex =
-    /^(?:[a-zA-Z]:)?(?:[\\/].+|[^\\/]+)(?:[\\/][\w .~-]+)*\.\w+$/;
+  const trimmedPath = inputPath.trim();
 
-  // Check for additional invalid characters like colons or quotes that shouldn't be in file paths
-  const invalidCharactersRegex = /[<>"'`|?*]/;
+  if (trimmedPath === "") {
+    return false;
+  }
 
-  // Check if path contains invalid characters or not following valid file path structure
-  if (invalidCharactersRegex.test(path)) return false;
-  if (!filePathRegex.test(path)) return false;
+  if (/[<>|*?"\x00-\x1F]/.test(trimmedPath)) {
+    return false;
+  }
 
-  // Ensure there is at most one colon in the path
-  const colonCount = (path.match(/:/g) || []).length;
-  if (colonCount > 1) return false;
+  if (/^[A-Za-z]:/.test(trimmedPath)) {
+    if (
+      trimmedPath.length === 2 ||
+      (trimmedPath.length > 2 &&
+        trimmedPath[2] !== "\\" &&
+        trimmedPath[2] !== "/")
+    ) {
+      return false;
+    }
+    if (trimmedPath.indexOf(":", 2) !== -1) {
+      return false;
+    }
+  } else {
+    if (trimmedPath.includes(":")) {
+      return false;
+    }
+  }
 
-  // Ensure there are no spaces in the path
-  if (/\s/.test(path)) return false;
+  try {
+    const baseName = path.basename(trimmedPath);
+    const extName = path.extname(baseName);
+
+    if (!extName || extName === ".") {
+      const lastSeparatorIndex = Math.max(
+        trimmedPath.lastIndexOf("/"),
+        trimmedPath.lastIndexOf("\\")
+      );
+      const lastSegment = trimmedPath.substring(lastSeparatorIndex + 1);
+
+      if (!lastSegment || lastSegment === "." || lastSegment === "..") {
+        return false;
+      }
+
+      const lastDotIndex = lastSegment.lastIndexOf(".");
+
+      if (lastDotIndex === -1) {
+        return false;
+      }
+
+      if (lastDotIndex === lastSegment.length - 1) {
+        return false;
+      }
+    }
+
+    const absoluteLastDotIndex = trimmedPath.lastIndexOf(".");
+    if (
+      absoluteLastDotIndex !== -1 &&
+      /[\\/]/.test(trimmedPath.substring(absoluteLastDotIndex + 1))
+    ) {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
 
   return true;
 }

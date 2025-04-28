@@ -1,12 +1,26 @@
-export function extractCommentString(code: string) {
-  // Match for the CSS file comment pattern
-  const multilineCommentRegex = /\/\*\s*(\S+)\s*\*\//g; // Matches /* filename */
-  const singleLineCommentRegex = /\/\/\s*(\S+)/g; // Matches // filename
+/**
+ * Extracts the content of the first comment (either single-line // or multi-line /* * /)
+ * found in the input string.
+ *
+ * @param code The string potentially containing code and comments.
+ * @returns The trimmed content of the first comment found, or undefined if no comment is found.
+ */
+export function extractCommentString(code: string): string | undefined {
+  if (!code) {
+    return undefined;
+  }
 
-  // Check for each type of comment and return the first match found
-  const match =
-    multilineCommentRegex.exec(code) || singleLineCommentRegex.exec(code);
+  const commentRegex = /\/\*(.*?)\*\/|\/\/(.*)/;
 
-  // If a match is found, return the captured filename
-  if (match && match[1]) return match[1].trim(); // Return the filename without extra spaces
+  const match = code.match(commentRegex);
+
+  if (match) {
+    const content = match[1] !== undefined ? match[1] : match[2];
+
+    if (content !== undefined) {
+      return content.trim();
+    }
+  }
+
+  return undefined;
 }

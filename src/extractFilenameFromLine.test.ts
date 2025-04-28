@@ -98,4 +98,215 @@ describe("extractFilenameFromLine", () => {
     );
     assert.strictEqual(result, "/another/valid/path.txt");
   });
+
+  it("should handle .env", () => {
+    assert.strictEqual(extractFilenameFromLine(".env"), ".env");
+    assert.strictEqual(extractFilenameFromLine("# .env"), ".env");
+    assert.strictEqual(extractFilenameFromLine("// .env"), ".env");
+    assert.strictEqual(extractFilenameFromLine("Path: `.env`"), ".env");
+    assert.strictEqual(extractFilenameFromLine('Path: ".env"'), ".env");
+    assert.strictEqual(extractFilenameFromLine("Path: '.env'"), ".env");
+    assert.strictEqual(
+      extractFilenameFromLine("Some text .env more text"),
+      ".env"
+    );
+  });
+
+  it("should handle ./.env", () => {
+    assert.strictEqual(extractFilenameFromLine("./.env"), "./.env");
+    assert.strictEqual(extractFilenameFromLine("# ./.env"), "./.env");
+    assert.strictEqual(extractFilenameFromLine("// ./.env"), "./.env");
+    assert.strictEqual(extractFilenameFromLine("Path: `./.env`"), "./.env");
+    assert.strictEqual(
+      extractFilenameFromLine("Some text ./.env more text"),
+      "./.env"
+    );
+  });
+
+  it("should handle a/b/c/.env.local", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("a/b/c/.env.local"),
+      "a/b/c/.env.local"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# a/b/c/.env.local"),
+      "a/b/c/.env.local"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("// a/b/c/.env.local"),
+      "a/b/c/.env.local"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Path: `a/b/c/.env.local`"),
+      "a/b/c/.env.local"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Some text a/b/c/.env.local more text"),
+      "a/b/c/.env.local"
+    );
+  });
+
+  it("should handle (config)/layout.tsx", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("(config)/layout.tsx"),
+      "(config)/layout.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# (config)/layout.tsx"),
+      "(config)/layout.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("// (config)/layout.tsx"),
+      "(config)/layout.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Path: `(config)/layout.tsx`"),
+      "(config)/layout.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Some text (config)/layout.tsx more text"),
+      "(config)/layout.tsx"
+    );
+  });
+
+  it("should handle src/(auth)/login/page.tsx", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("src/(auth)/login/page.tsx"),
+      "src/(auth)/login/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# src/(auth)/login/page.tsx"),
+      "src/(auth)/login/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("// src/(auth)/login/page.tsx"),
+      "src/(auth)/login/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Path: `src/(auth)/login/page.tsx`"),
+      "src/(auth)/login/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Some text src/(auth)/login/page.tsx more text"),
+      "src/(auth)/login/page.tsx"
+    );
+  });
+
+  it("should handle path with spaces", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("// `path/with spaces/file.txt`"),
+      "path/with spaces/file.txt"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# `path/with spaces/file.txt`"),
+      "path/with spaces/file.txt"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Path: `path/with spaces/file.txt`"),
+      "path/with spaces/file.txt"
+    );
+  });
+
+  it("should handle my.file.name.txt", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("my.file.name.txt"),
+      "my.file.name.txt"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# my.file.name.txt"),
+      "my.file.name.txt"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("// my.file.name.txt"),
+      "my.file.name.txt"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Path: `my.file.name.txt`"),
+      "my.file.name.txt"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Some text my.file.name.txt more text"),
+      "my.file.name.txt"
+    );
+  });
+
+  it("should prioritize quoted paths over unquoted paths in the same line", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("invalid/path? `valid/path.txt`"),
+      "valid/path.txt"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("valid/path1.txt `valid/path2.txt`"),
+      "valid/path2.txt"
+    );
+  });
+
+  it("should handle paths with mixed characters including dots, hyphens, underscores, and slashes", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("my-file_name.1.0/path/to/file.txt"),
+      "my-file_name.1.0/path/to/file.txt"
+    );
+  });
+
+  it("should handle paths with mixed characters including dots, hyphens, underscores, slashes, and parentheses", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("my-file_name.1.0/path/(group)/file.txt"),
+      "my-file_name.1.0/path/(group)/file.txt"
+    );
+  });
+
+  it("should handle paths starting with a dot and containing parentheses", () => {
+    assert.strictEqual(
+      extractFilenameFromLine(".next/(cache)/route.js"),
+      ".next/(cache)/route.js"
+    );
+  });
+
+  it("should handle paths with square brackets", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("app/[locale]/page.tsx"),
+      "app/[locale]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# app/[locale]/page.tsx"),
+      "app/[locale]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("// app/[locale]/page.tsx"),
+      "app/[locale]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Path: `app/[locale]/page.tsx`"),
+      "app/[locale]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Some text app/[locale]/page.tsx more text"),
+      "app/[locale]/page.tsx"
+    );
+  });
+
+  it("should handle paths with square brackets and spread syntax", () => {
+    assert.strictEqual(
+      extractFilenameFromLine("app/(marketing)/[...slug]/page.tsx"),
+      "app/(marketing)/[...slug]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("# app/(marketing)/[...slug]/page.tsx"),
+      "app/(marketing)/[...slug]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("// app/(marketing)/[...slug]/page.tsx"),
+      "app/(marketing)/[...slug]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine("Path: `app/(marketing)/[...slug]/page.tsx`"),
+      "app/(marketing)/[...slug]/page.tsx"
+    );
+    assert.strictEqual(
+      extractFilenameFromLine(
+        "Some text app/(marketing)/[...slug]/page.tsx more text"
+      ),
+      "app/(marketing)/[...slug]/page.tsx"
+    );
+  });
 });

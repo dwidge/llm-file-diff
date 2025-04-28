@@ -1,53 +1,47 @@
 import { isFilePath } from "./isFilePath.js";
 
-export function extractFilenameFromLine(previousLine: string) {
-  let lineWithoutComment = previousLine;
-
-  if (previousLine.startsWith("// ")) {
-    lineWithoutComment = previousLine.substring(3);
-  } else if (previousLine.startsWith("//")) {
-    lineWithoutComment = previousLine.substring(2);
-  } else if (previousLine.startsWith("# ")) {
-    lineWithoutComment = previousLine.substring(2);
-  } else if (previousLine.startsWith("#")) {
-    lineWithoutComment = previousLine.substring(1);
+/**
+ * Extracts the first valid file path found in a line of text.
+ * It prioritizes paths enclosed in double quotes ("), single quotes ('), or backticks (`).
+ * If no quoted path is found, it looks for unquoted paths separated by whitespace,
+ * attempting to clean common trailing punctuation before validation.
+ *
+ * @param line The string line to search within.
+ * @returns The first valid file path found, or undefined if none is found.
+ */
+export function extractFilenameFromLine(line: string): string | undefined {
+  if (!line || line.trim() === "") {
+    return undefined;
   }
 
-  // Check for unquoted file path and trim surrounding symbols/whitespace
-  const trimmedLine = lineWithoutComment
-    .trim()
-    .replace(/^[^\w/]+|[^\w/]+$/g, "");
-  if (isFilePath(trimmedLine)) return trimmedLine;
+  const quoteRegex = /(?:"([^"]+)"|'([^']+)'|`([^`]+)`)/g;
 
-  // Check for first quoted file path
-  for (const quotedPath of findQuoted(previousLine)) {
-    // Use original line for quoted paths
-    if (isFilePath(quotedPath)) return quotedPath;
-  }
+  const quoteMatches = line.matchAll(quoteRegex);
 
-  const validUnquotedPath = findFirstValidUnquotedPath(trimmedLine);
-  if (validUnquotedPath) return validUnquotedPath;
-}
+  for (const match of quoteMatches) {
+    const potentialPath = match[1] ?? match[2] ?? match[3];
 
-function findFirstValidUnquotedPath(line: string) {
-  // Regular expression to match potential file paths
-  const regex = /[\w/.-]+/g;
-  const matches = line.match(regex);
-  if (matches) {
-    for (const match of matches) {
-      if (isFilePath(match)) {
-        return match;
-      }
+    if (potentialPath && isFilePath(potentialPath)) {
+      return potentialPath;
     }
   }
-  return undefined;
-}
 
-function* findQuoted(line: string) {
-  const regex = /['"`]([^'"`]+)['"`]/g;
-  let match;
+  const tokens = line.split(/\s+/);
 
-  while ((match = regex.exec(line)) !== null) {
-    yield match[1];
+  for (const token of tokens) {
+    if (!token) continue;
+
+    if (isFilePath(token)) {
+      return token;
+    }
+
+    const trailingPunctuationRegex = /[.,;:!?]+$/;
+    const cleanedToken = token.replace(trailingPunctuationRegex, "");
+
+    if (cleanedToken !== token && isFilePath(cleanedToken)) {
+      return cleanedToken;
+    }
   }
+
+  return undefined;
 }
