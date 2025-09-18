@@ -1,3 +1,4 @@
+import { defaultFileTypeMap } from "./defaultFileTypeMap.js";
 import { extractCodeBlocks } from "./extractCodeBlocks.js";
 import { extractFilenameFromCodeBlock } from "./extractFilenameFromCodeBlock.js";
 import { extractFilenameFromLine } from "./extractFilenameFromLine.js";
@@ -46,33 +47,18 @@ import { extractFilenameFromLine } from "./extractFilenameFromLine.js";
 
 export function extractFilesFromAIResponse(
   response: string,
-  contextFiles: Record<string, string>
+  contextFiles: Record<string, string>,
+  fileTypeMap: Record<string, string | null> = defaultFileTypeMap
 ): Record<string, string> {
   const fileContents: Record<string, string> = {};
 
   for (const { fileType, content, previousLine } of extractCodeBlocks(
     response
   )) {
-    // Infer the file extension based on the type
-    let fileExtension: string;
-    switch (fileType) {
-      case "typescript":
-        fileExtension = ".ts";
-        break;
-      case "javascript":
-        fileExtension = ".js";
-        break;
-      case "json":
-        fileExtension = ".json";
-        break;
-      case "html":
-        fileExtension = ".html";
-        break;
-      case "css":
-        fileExtension = ".css";
-        break;
-      default:
-        fileExtension = ".txt";
+    const fileExtension = fileTypeMap[fileType] ?? fileTypeMap[""] ?? null;
+
+    if (fileExtension === null) {
+      continue;
     }
 
     const extractedPath = extractFilenameFromCodeBlock(content);
