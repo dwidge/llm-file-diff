@@ -55,7 +55,12 @@ export function extractFilesFromAIResponse(
   for (const { fileType, content, previousLine } of extractCodeBlocks(
     response
   )) {
-    const fileExtension = fileTypeMap[fileType] ?? fileTypeMap[""] ?? null;
+    const fileExtensionEntry = fileTypeMap[fileType];
+    const defaultExtensionEntry = fileTypeMap[""] ?? null;
+    const fileExtension =
+      fileExtensionEntry === undefined
+        ? defaultExtensionEntry
+        : fileExtensionEntry;
 
     if (fileExtension === null) {
       continue;
